@@ -4,72 +4,105 @@ import Container from "@components/Container.astro";
 import PageLayout from "@layouts/PageLayout.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import Link from "@components/Link.astro";
-import { dateRange } from "@lib/utils";
 import { SITE, HOME, SOCIALS } from "@consts";
+import { books as allBooks } from "@lib/books";
 
 const blog = (await getCollection("blog"))
   .filter(post => !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0,SITE.NUM_POSTS_ON_HOMEPAGE);
 
-const projects = (await getCollection("projects"))
-  .filter(project => !project.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0,SITE.NUM_PROJECTS_ON_HOMEPAGE);
-
 const allwork = (await getCollection("work"))
-  .sort((a, b) => new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf())
-  .slice(0,SITE.NUM_WORKS_ON_HOMEPAGE);
+  .sort((a, b) => new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf());
 
-const work = await Promise.all(
-  allwork.map(async (item) => {
-    const { Content } = await item.render();
-    return { ...item, Content };
-  })
+const homepageCompanies = ["Etsy", "Writer", "Shopify", "HubSpot"];
+const uniqueWork = allwork.filter((entry, i, arr) =>
+  homepageCompanies.includes(entry.data.company) &&
+  arr.findIndex(e => e.data.company === entry.data.company) === i
 );
 
 ---
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
+  <!-- Hero zone: Intro + Work -->
   <Container>
-    <h4 class="animate font-semibold text-black dark:text-white">
-      Hi, I'm Nano <span class="text-xl">👋🏻</span> 
-    </h4>
-    <div class="space-y-16">
-      <section>
-        <article class="space-y-4">
-          <p class="animate">
-            I am a minimal, seo friendly, accessible portfolio and blog for developers. 
-            I am an even more lightweight version of my popular theme
-            <Link href="https://github.com/markhorn-dev/astro-sphere" aria-label="Astro Sphere on Github" external>
-              Astro Sphere
-            </Link>.
-            I have a lighthouse scores of 100 across the board for performance, 
-            accesibility, best practices and SEO.
+    <div class="space-y-12">
+      <div class="space-y-6">
+        <div>
+          <h1 class="animate font-display italic text-4xl sm:text-5xl text-content-primary tracking-tight leading-[1.1]">
+            Hi, I'm Mukul
+          </h1>
+          <div class="animate accent-line mt-4"></div>
+        </div>
+        <div class="space-y-4">
+          <p class="animate font-mono text-sm text-content-muted tracking-tight">
+            Staff Machine Learning Scientist — Etsy — NYC
           </p>
-          <p class="animate">
-            I come packed with full type safety, a sitemap, an rss feed, markdown 
-            and mdx support (use components in your markdown) through astro integrations.
-            I am styled with tailwind and come preconfigured with light, dark and 
-            system/os theme preferences out of the box.
-          </p>
-          <p class="animate">
-            Visit
-            <Link href="https://github.com/markhorn-dev/astro-nano" aria-label="Astro Nano on Github" external>
-              Astro Nano on Github
-            </Link>
-            to fork the repository, read the docs or one-click deploy on Vercel or Netlify. 
-          </p>
-        </article>
-      </section>
+          <article>
+            <p class="animate text-base leading-relaxed">
+              I like hard problems, the kind that sit between research and application, and I like building things from zero to one.
+            </p>
+            <p class="animate text-base leading-relaxed">
+              Outside of work, I read and write quite a bit and have a weakness for anything with an engine. I also make films, take photos, and am slowly — very slowly — working towards my pilot's licence.
+            </p>
+          </article>
+        </div>
+      </div>
 
+      <section class="animate space-y-5">
+        <div class="flex items-baseline gap-2">
+          <h2 class="font-display text-xl text-content-primary">
+            I've worked at
+          </h2>
+          <span class="text-accent/40">—</span>
+          <Link href="/work">
+            See details
+          </Link>
+        </div>
+        <ul class="flex flex-wrap gap-6">
+          {uniqueWork.map(entry => (
+            entry.data.icon && (
+              <li>
+                <a href={entry.data.url || "/work"} target={entry.data.url ? "_blank" : "_self"} class="flex flex-col items-center gap-2 group">
+                  <div class="w-12 h-12 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center group-hover:bg-[var(--bg-tertiary)] transition-colors duration-300">
+                    <img
+                      src={entry.data.icon}
+                      alt={entry.data.company}
+                      class="w-7 h-7 object-contain transition-all duration-300"
+                    />
+                  </div>
+                  <span class="font-mono text-xs text-content-muted group-hover:text-content-secondary transition-colors text-center leading-tight">
+                    {entry.data.company}
+                  </span>
+                </a>
+              </li>
+            )
+          ))}
+          <li>
+            <a href="/work" class="flex flex-col items-center gap-2 group">
+              <div class="w-12 h-12 rounded-xl bg-[var(--bg-secondary)] group-hover:bg-[var(--bg-tertiary)] transition-colors duration-300 flex items-center justify-center">
+                <span class="text-content-muted text-lg tracking-widest">...</span>
+              </div>
+              <span class="font-mono text-xs text-content-muted group-hover:text-content-secondary transition-colors text-center leading-tight">
+                & more
+              </span>
+            </a>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </Container>
+
+  <!-- Content sections -->
+  <Container>
+    <div class="space-y-16 mt-28">
       <section class="animate space-y-6">
         <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Latest posts
-          </h5>
+          <h2 class="font-display text-xl text-content-primary">
+            Things I've written
+          </h2>
           <Link href="/blog">
-            See all posts
+            See all writing
           </Link>
         </div>
         <ul class="flex flex-col gap-4">
@@ -81,61 +114,59 @@ const work = await Promise.all(
         </ul>
       </section>
 
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Work Experience
-          </h5>
-          <Link href="/work">
-            See all work
-          </Link>
+      <section class="animate space-y-4">
+        <div>
+          <h2 class="font-display text-xl text-content-primary">
+            Books I recommend
+          </h2>
+          <p class="font-mono text-xs text-content-muted mt-1">"It is what you read when you don't have to that determines who you will be when you can't help it." — Oscar Wilde</p>
         </div>
-        <ul class="flex flex-col space-y-4">
-          {work.map(entry => (
-            <li>
-              <div class="text-sm opacity-75">
-                {dateRange(entry.data.dateStart, entry.data.dateEnd)}
-              </div>
-              <div class="font-semibold text-black dark:text-white">
-                {entry.data.company}
-              </div>
-              <div class="text-sm opacity-75">
-                {entry.data.role}
-              </div>
-              <article>
-                <entry.Content />
-              </article>
-            </li>
-          ))}
+        <ul id="book-list" data-books={JSON.stringify(allBooks)} class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2.5">
+          <li class="text-sm"><Link href="/books">See full list</Link></li>
         </ul>
       </section>
 
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Recent projects
-          </h5>
-          <Link href="/projects">
-            See all projects
-          </Link>
-        </div>
-        <ul class="flex flex-col gap-4">
-          {projects.map(project => (
-            <li>
-              <ArrowCard entry={project} />
-            </li>
-          ))}
+      <section class="animate space-y-5">
+        <h2 class="font-display text-xl text-content-primary">
+          Where I studied
+        </h2>
+        <ul class="flex flex-col space-y-4">
+          <li class="flex gap-3 items-center">
+            <div class="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center shrink-0">
+              <img src="/work/gatech.png" alt="Georgia Institute of Technology" class="w-5 h-5 object-contain" />
+            </div>
+            <div>
+              <div class="text-sm text-content-primary">
+                Georgia Institute of Technology
+              </div>
+              <div class="font-mono text-xs text-content-muted">
+                MS Computer Science — Machine Learning
+              </div>
+            </div>
+          </li>
+          <li class="flex gap-3 items-center">
+            <div class="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] flex items-center justify-center shrink-0">
+              <img src="/work/rpi.png" alt="Rensselaer Polytechnic Institute" class="w-5 h-5 object-contain" />
+            </div>
+            <div>
+              <div class="text-sm text-content-primary">
+                Rensselaer Polytechnic Institute
+              </div>
+              <div class="font-mono text-xs text-content-muted">
+                BS Computer Science — Minor in Business
+              </div>
+            </div>
+          </li>
         </ul>
       </section>
 
       <section class="animate space-y-4">
-        <h5 class="font-semibold text-black dark:text-white">
-          Let's Connect
-        </h5>
+        <h2 class="font-display text-xl text-content-primary">
+          Say hi
+        </h2>
         <article>
           <p>
-            If you want to get in touch with me about something or just to say hi,
-            reach out on social media or send me an email.
+            Always happy to talk about hard ML problems, interesting companies, or whatever you're building. Also up for conversations about photography, cars, politics, or a good book.
           </p>
         </article>
         <ul class="flex flex-wrap gap-2">
@@ -144,16 +175,41 @@ const work = await Promise.all(
               <Link href={SOCIAL.HREF} external aria-label={`${SITE.NAME} on ${SOCIAL.NAME}`}>
                 {SOCIAL.NAME}
               </Link>
-              {"/"}
+              <span class="text-accent/40">/</span>
             </li>
           ))}
-          <li class="line-clamp-1">
-            <Link href={`mailto:${SITE.EMAIL}`} aria-label={`Email ${SITE.NAME}`}>
-              {SITE.EMAIL}
-            </Link>
+          <li class="text-nowrap">
+            <a id="email-link" class="inline-block text-content-secondary hover:text-accent transition-colors duration-300 ease-in-out underline underline-offset-2 decoration-accent/30 hover:decoration-accent/60 cursor-pointer"></a>
           </li>
         </ul>
       </section>
     </div>
   </Container>
+<script is:inline>
+  function initHomepage() {
+    var u = 'mukul.surajiwale';
+    var d = 'gmail.com';
+    var el = document.getElementById('email-link');
+    if (el && !el.href) {
+      var addr = u + '@' + d;
+      el.href = 'mailto:' + addr;
+      el.textContent = addr;
+    }
+
+    var list = document.getElementById('book-list');
+    if (list && list.children.length <= 1) {
+      var allBooks = JSON.parse(list.getAttribute('data-books') || '[]');
+      var shuffled = allBooks.sort(function() { return Math.random() - 0.5; }).slice(0, 5);
+      var link = list.firstElementChild;
+      shuffled.forEach(function(b) {
+        var li = document.createElement('li');
+        li.className = 'text-sm';
+        li.innerHTML = '<span class="text-content-primary">' + b.title + '</span><span class="text-content-muted text-xs">, ' + b.author + '</span>';
+        list.insertBefore(li, link);
+      });
+    }
+  }
+  initHomepage();
+  document.addEventListener('astro:after-swap', initHomepage);
+</script>
 </PageLayout>

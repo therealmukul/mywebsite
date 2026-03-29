@@ -1,33 +1,23 @@
 ---
 import Container from "@components/Container.astro";
-import Link from "@components/Link.astro";
 import { SITE } from "@consts";
+
+const isHome = Astro.url.pathname === "/";
 ---
 
 <header>
   <Container>
-    <div class="flex flex-wrap gap-y-2 justify-between">
-      <Link href="/" underline={false}>
-        <div class="font-semibold">
-          {SITE.NAME}
-        </div>
-      </Link>
-      <nav class="flex gap-1">
-        <Link href="/blog">
-          blog
-        </Link>
-        <span>
-          {`/`}
-        </span>
-        <Link href="/work">
-          work
-        </Link>
-        <span>
-          {`/`}
-        </span>
-        <Link href="/projects">
-          projects
-        </Link>
+    <div class="flex flex-wrap gap-y-2 justify-between items-baseline">
+      <a href="/" class:list={[
+        "font-display italic text-lg tracking-tight hover:text-accent transition-colors duration-300",
+        isHome ? "text-content-secondary" : "text-content-primary"
+      ]}>
+        {SITE.NAME}
+      </a>
+      <nav class="flex items-center gap-1 font-mono text-sm tracking-tight">
+        <a href="/blog" class="text-content-secondary hover:text-accent transition-colors duration-300">writing</a>
+        <span class="text-accent/40 mx-1">/</span>
+        <a href="/work" class="text-content-secondary hover:text-accent transition-colors duration-300">work</a>
       </nav>
     </div>
   </Container>

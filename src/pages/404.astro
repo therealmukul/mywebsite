@@ -1,0 +1,22 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import Container from "@components/Container.astro";
+import Link from "@components/Link.astro";
+---
+
+<PageLayout title="Not Found" description="Page not found.">
+  <Container>
+    <div class="flex flex-col items-center justify-center text-center space-y-4 py-20">
+      <div class="font-mono text-6xl text-content-muted">404</div>
+      <div class="font-display text-xl text-content-primary">
+        Nothing here
+      </div>
+      <p class="text-sm text-content-secondary">
+        The page you're looking for doesn't exist or has been moved.
+      </p>
+      <Link href="/">
+        Back home
+      </Link>
+    </div>
+  </Container>
+</PageLayout>
