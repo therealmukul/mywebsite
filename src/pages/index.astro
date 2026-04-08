@@ -40,10 +40,10 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
           </p>
           <article>
             <p class="animate text-base leading-relaxed">
-              I like hard problems, the kind that sit between research and application, and I like building things from zero to one.
+              I like finding and solving meaningful non-trivial problems at the intersection of research and application. I love building things from zero to one and prefer working with like-minded mission-driven people who care deeply about the societal impact of their work.
             </p>
             <p class="animate text-base leading-relaxed">
-              Outside of work, I read and write quite a bit and have a weakness for anything with an engine. I also make films, take photos, and am slowly — very slowly — working towards my pilot's licence.
+              Outside of work, I read and write quite a bit, dabble in photography, and have a weakness for anything with an engine. I am slowly — very slowly — working towards my pilot's licence.
             </p>
           </article>
         </div>
@@ -74,6 +74,9 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
                   <span class="font-mono text-xs text-content-muted group-hover:text-content-secondary transition-colors text-center leading-tight">
                     {entry.data.company}
                   </span>
+                  {typeof entry.data.dateEnd === "string" && entry.data.dateEnd.toLowerCase() === "current" && (
+                    <span class="font-mono text-[10px] text-accent now-pulse">now</span>
+                  )}
                 </a>
               </li>
             )
@@ -186,6 +189,8 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
     </div>
   </Container>
 <script is:inline>
+  var bookInterval = null;
+
   function initHomepage() {
     var u = 'mukul.surajiwale';
     var d = 'gmail.com';
@@ -197,18 +202,75 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
     }
 
     var list = document.getElementById('book-list');
-    if (list && list.children.length <= 1) {
-      var allBooks = JSON.parse(list.getAttribute('data-books') || '[]');
-      var shuffled = allBooks.sort(function() { return Math.random() - 0.5; }).slice(0, 5);
-      var link = list.firstElementChild;
-      shuffled.forEach(function(b) {
+    if (!list) return;
+
+    var allBooks = JSON.parse(list.getAttribute('data-books') || '[]');
+    if (!allBooks.length) return;
+
+    function shuffle(arr) {
+      var a = arr.slice();
+      for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      return a;
+    }
+
+    function getBookItems() {
+      return Array.from(list.querySelectorAll('[data-book]'));
+    }
+
+    function renderBooks(books) {
+      var link = list.querySelector('[data-link]');
+      getBookItems().forEach(function(el) { el.remove(); });
+      books.forEach(function(b) {
         var li = document.createElement('li');
-        li.className = 'text-sm';
+        li.className = 'text-sm book-item';
+        li.setAttribute('data-book', '');
+        li.style.opacity = '0';
+        li.style.transition = 'opacity 0.4s ease';
         li.innerHTML = '<span class="text-content-primary">' + b.title + '</span><span class="text-content-muted text-xs">, ' + b.author + '</span>';
         list.insertBefore(li, link);
+        // trigger reflow then fade in
+        li.offsetHeight;
+        li.style.opacity = '1';
       });
     }
+
+    // Initial render
+    var shuffled = shuffle(allBooks);
+    var offset = 0;
+
+    // Tag the link so we can find it
+    var linkEl = list.firstElementChild;
+    if (linkEl) linkEl.setAttribute('data-link', '');
+
+    renderBooks(shuffled.slice(0, 5));
+    offset = 5;
+
+    // Cycle every 8 seconds
+    if (bookInterval) clearInterval(bookInterval);
+    bookInterval = setInterval(function() {
+      // Fade out current
+      var items = getBookItems();
+      items.forEach(function(el) { el.style.opacity = '0'; });
+
+      setTimeout(function() {
+        // Get next 5
+        var next = [];
+        for (var i = 0; i < 5; i++) {
+          if (offset >= shuffled.length) {
+            shuffled = shuffle(allBooks);
+            offset = 0;
+          }
+          next.push(shuffled[offset]);
+          offset++;
+        }
+        renderBooks(next);
+      }, 400);
+    }, 8000);
   }
+
   initHomepage();
   document.addEventListener('astro:after-swap', initHomepage);
 </script>

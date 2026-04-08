@@ -111,6 +111,16 @@ html.scrolled #back-to-top {
 }
 
 /* Accent line animation */
+/* Pulsating text */
+.now-pulse {
+  animation: text-pulse 3s ease-in-out infinite;
+}
+
+@keyframes text-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 .accent-line {
   width: 0;
   height: 1px;

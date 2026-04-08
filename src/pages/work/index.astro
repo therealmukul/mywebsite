@@ -36,32 +36,39 @@ for (const entry of work) {
   }
 }
 
-// Compute year for each group (from most recent role's start)
+// Year markers based on earliest role start at each company
 const currentYear = new Date().getFullYear();
 const groupYears = grouped.map(g => {
   const endDate = g.roles[0].data.dateEnd;
   if (typeof endDate === "string" && endDate.toLowerCase() === "current") return currentYear;
-  return new Date(g.roles[0].data.dateStart).getFullYear();
+  const earliest = g.roles[g.roles.length - 1].data.dateStart;
+  return new Date(earliest).getFullYear();
 });
-const totalGroups = grouped.length;
+
 ---
 
 <PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
   <Container>
     <div class="space-y-10">
-      <div class="animate font-display text-2xl text-content-primary">
-        Work
+      <div class="animate flex items-baseline justify-between">
+        <div class="font-display text-2xl text-content-primary">
+          Work
+        </div>
+        <button id="toggle-all" class="font-mono text-xs text-content-muted hover:text-accent transition-colors duration-300">
+          expand all
+        </button>
       </div>
 
       <!-- Timeline -->
       <div class="relative">
-        <!-- Gradient vertical line: accent at top fading to muted -->
+        <!-- Gradient vertical line -->
         <div class="absolute left-[19px] top-0 bottom-0 w-px" style="background: linear-gradient(to bottom, var(--color-accent), var(--bg-tertiary) 40%, var(--bg-tertiary));" />
 
-        <ul class="flex flex-col">
+        <ul class="flex flex-col gap-3">
           {grouped.map((group, i) => {
             const showYear = i === 0 || groupYears[i] !== groupYears[i - 1];
-            const fadeLevel = Math.min(i / (totalGroups - 1), 1);
+            const entryId = `work-${i}`;
+            const isSingle = group.roles.length === 1;
 
             return (
             <li class="animate relative">
@@ -73,7 +80,13 @@ const totalGroups = grouped.length;
               )}
 
               {/* Company header row */}
-              <div class="flex items-center gap-4 relative z-10 group cursor-pointer" data-toggle-roles>
+              <div
+                class="flex items-center gap-4 relative z-10 cursor-pointer rounded-lg -mx-2 px-2 py-1 hover:bg-[var(--bg-secondary)] transition-colors duration-200 timeline-toggle"
+                role="button"
+                aria-expanded="false"
+                aria-controls={entryId}
+                data-toggle-roles
+              >
                 {/* Logo node */}
                 <div class:list={[
                   "w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden border-2 transition-all duration-300",
@@ -85,67 +98,64 @@ const totalGroups = grouped.length;
                     <img
                       src={group.icon}
                       alt={group.company}
-                      class:list={[
-                        "w-6 h-6 rounded-sm object-contain transition-all duration-300",
-                        i > 0 && `opacity-${Math.round((1 - fadeLevel * 0.4) * 100)}`
-                      ]}
-                      style={i > 0 ? `filter: grayscale(${Math.round(fadeLevel * 40)}%)` : ""}
+                      class="w-6 h-6 rounded-sm object-contain"
                     />
                   ) : (
                     <div class="w-3 h-3 rounded-full bg-content-muted" />
                   )}
                 </div>
-                <div class="flex-1">
+                <div class="flex-1 min-w-0">
                   <div class="font-semibold text-content-primary">
                     {group.company}
                   </div>
                   <div class="font-mono text-xs text-content-muted">
-                    {group.roles.length > 1
-                      ? dateRange(
+                    {isSingle
+                      ? dateRange(group.roles[0].data.dateStart, group.roles[0].data.dateEnd)
+                      : dateRange(
                           group.roles[group.roles.length - 1].data.dateStart,
                           group.roles[0].data.dateEnd
                         )
-                      : dateRange(group.roles[0].data.dateStart, group.roles[0].data.dateEnd)
                     }
+                    <span class="role-inline"> · {group.roles[0].data.role}</span>
                   </div>
                 </div>
-                {/* Expand indicator */}
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-4 h-4 text-content-muted opacity-0 group-hover:opacity-60 transition-opacity duration-300 role-chevron">
+                {/* Chevron - close to content */}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-4 h-4 text-content-muted opacity-30 shrink-0 role-chevron" aria-hidden="true">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </div>
 
-              {/* Roles - collapsed by default, expanded on click */}
-              <div class="ml-[19px] pl-[21px] border-l border-transparent role-details" data-expanded="true">
-                {group.roles.length === 1 ? (
-                  <div class="pt-2 pb-8 role-content">
-                    <div class="text-sm font-medium text-content-primary opacity-80">
+              {/* Roles - collapsed by default */}
+              <div id={entryId} class="ml-[19px] pl-[37px] border-l border-transparent role-details" data-expanded="false">
+                {isSingle ? (
+                  <div class="pt-1 pb-4 role-content">
+                    <div class="text-sm font-medium text-content-primary role-title-expanded">
                       {group.roles[0].data.role}
                     </div>
-                    <article class="mt-1 text-sm text-content-muted role-description">
+                    <article class="text-sm text-content-muted role-description">
                       {(() => { const C = group.roles[0].Content; return <C />; })()}
                     </article>
                   </div>
                 ) : (
-                  <ul class="pt-2 pb-8 flex flex-col gap-4 role-content">
+                  <ul class="pt-1 pb-4 flex flex-col gap-2 role-content">
                     {group.roles.map((entry, j) => (
                       <li class="relative pl-4">
                         {/* Sub-node dot */}
-                        <div class="absolute -left-[21px] top-[7px] w-full pointer-events-none">
+                        <div class="absolute -left-[37px] top-[7px] w-full pointer-events-none">
                           <div class:list={[
                             "w-2 h-2 rounded-full -ml-[4px] ring-2 ring-[var(--bg-primary)]",
                             i === 0 && j === 0 ? "bg-accent" : "bg-content-muted"
                           ]} />
                         </div>
                         {/* Connector tick */}
-                        <div class="absolute -left-[21px] top-[10px] w-[17px] h-px bg-[var(--bg-tertiary)]" />
-                        <div class="text-sm font-medium text-content-primary opacity-80">
+                        <div class="absolute -left-[37px] top-[10px] w-[33px] h-px bg-[var(--bg-tertiary)]" />
+                        <div class="text-sm font-medium text-content-primary">
                           {entry.data.role}
                         </div>
                         <div class="font-mono text-xs text-content-muted">
                           {dateRange(entry.data.dateStart, entry.data.dateEnd)}
                         </div>
-                        <article class="mt-1 text-sm text-content-muted role-description">
+                        <article class="text-sm text-content-muted role-description">
                           <entry.Content />
                         </article>
                       </li>
@@ -157,13 +167,6 @@ const totalGroups = grouped.length;
             );
           })}
 
-          {/* Terminal node */}
-          <li class="relative z-10">
-            <div class="absolute -top-16 left-[19px] w-px h-16 bg-gradient-to-b from-[var(--bg-tertiary)] to-transparent" />
-            <div class="w-10 h-10 rounded-full bg-[var(--bg-secondary)] border-2 border-[var(--bg-tertiary)] flex items-center justify-center">
-              <div class="w-2.5 h-2.5 rounded-full bg-content-muted" />
-            </div>
-          </li>
         </ul>
       </div>
     </div>
@@ -171,7 +174,7 @@ const totalGroups = grouped.length;
 </PageLayout>
 
 <style>
-  /* 1. Pulse glow on current role */
+  /* Pulse glow on current role */
   .pulse-glow {
     animation: pulse-accent 3s ease-in-out infinite;
   }
@@ -185,47 +188,106 @@ const totalGroups = grouped.length;
     }
   }
 
-  /* 2. Hover to reveal descriptions */
-  .role-description {
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transition: max-height 0.4s ease, opacity 0.3s ease, margin 0.3s ease;
-    margin-top: 0;
-  }
-
-  .role-details[data-expanded="true"] .role-description {
-    max-height: 200px;
-    opacity: 1;
-    margin-top: 0.25rem;
-  }
-
+  /* Chevron */
   .role-chevron {
     transition: transform 0.3s ease, opacity 0.3s ease;
   }
 
-  .role-details[data-expanded="false"] ~ .role-chevron,
-  [data-expanded="false"] .role-chevron {
-    transform: rotate(0deg);
+  .timeline-toggle[aria-expanded="true"] .role-chevron {
+    transform: rotate(180deg);
+    opacity: 0.6;
   }
 
-  [data-toggle-roles]:has(+ [data-expanded="true"]) .role-chevron {
-    transform: rotate(180deg);
-    opacity: 0.4;
+  .timeline-toggle[aria-expanded="true"] {
+    background-color: var(--bg-secondary);
+  }
+
+  /* Hide inline role when expanded (single-role entries) */
+  .timeline-toggle[aria-expanded="true"] .role-inline {
+    display: none;
+  }
+
+  /* Expand/collapse descriptions */
+  .role-description {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+  }
+
+  .role-details[data-expanded="true"] .role-description {
+    max-height: 300px;
+    opacity: 1;
+  }
+
+  /* Hide expanded role title when collapsed (single-role entries) */
+  .role-title-expanded {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+  }
+
+  .role-details[data-expanded="true"] .role-title-expanded {
+    max-height: 40px;
+    opacity: 1;
+  }
+
+  /* Collapsed state: no space */
+  .role-details[data-expanded="false"] .role-content {
+    padding: 0;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+  }
+
+  .role-details[data-expanded="true"] .role-content {
+    max-height: 2000px;
+    transition: max-height 0.4s ease;
   }
 </style>
 
 <script is:inline>
-  function initTimeline() {
-    document.querySelectorAll('[data-toggle-roles]').forEach(function(header) {
-      header.addEventListener('click', function() {
-        var details = this.nextElementSibling;
-        if (!details || !details.classList.contains('role-details')) return;
+  (function() {
+    function areAllExpanded() {
+      var details = document.querySelectorAll('.role-details');
+      if (!details.length) return false;
+      for (var i = 0; i < details.length; i++) {
+        if (details[i].getAttribute('data-expanded') !== 'true') return false;
+      }
+      return true;
+    }
+
+    function updateToggleAllLabel() {
+      var btn = document.getElementById('toggle-all');
+      if (btn) btn.textContent = areAllExpanded() ? 'collapse all' : 'expand all';
+    }
+
+    document.addEventListener('click', function(e) {
+      // Individual toggle
+      var toggle = e.target.closest('[data-toggle-roles]');
+      if (toggle) {
+        var details = document.getElementById(toggle.getAttribute('aria-controls'));
+        if (!details) return;
         var expanded = details.getAttribute('data-expanded') === 'true';
         details.setAttribute('data-expanded', expanded ? 'false' : 'true');
-      });
+        toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        updateToggleAllLabel();
+        return;
+      }
+
+      // Toggle all
+      if (e.target.id === 'toggle-all' || e.target.closest('#toggle-all')) {
+        var allExpanded = areAllExpanded();
+        var state = allExpanded ? 'false' : 'true';
+        document.querySelectorAll('.role-details').forEach(function(d) {
+          d.setAttribute('data-expanded', state);
+        });
+        document.querySelectorAll('[data-toggle-roles]').forEach(function(h) {
+          h.setAttribute('aria-expanded', state);
+        });
+        updateToggleAllLabel();
+      }
     });
-  }
-  document.addEventListener('DOMContentLoaded', initTimeline);
-  document.addEventListener('astro:after-swap', initTimeline);
+  })();
 </script>
