@@ -53,10 +53,10 @@ The large model is where it gets more interesting. With 33 ranks, one iteration 
 
 The communication overhead stayed surprisingly low too. Even at 1,025 ranks, only about 7% of the iteration time was spent on message passing. Most of the time was actual computation.
 
-## The Honest Gaps
+## Reflecting on it after ~10 years
 
 OK so the big thing I never actually showed is whether the parallel version actually *learns*. All of our results are wall-clock speedups. I confirmed that the framework could learn on smaller models with real data, but for the large-scale tests I just generated dummy data because I couldn't find a dataset that fit a model with 377 million weights. Not great.
 
 The other issue is the ghost neuron design. By only exchanging boundary values, the parallel version isn't computing the same thing as the serial version. Each rank only sees a slice of the previous layer, which means the network is learning more localized features than a fully connected one would. I probably should have used `MPI_Bcast` to maintain full connectivity, even if it meant more communication overhead. At least it would have been correct.
 
-And honestly, if I were doing this today, I wouldn't build the framework from scratch. I'd focus on the parallelism strategy and benchmark it against existing tools. But as an undergrad, building a neural network neuron by neuron was the whole point. I didn't really understand how these things worked until I had to implement every single weight update myself.
+And honestly, if I were doing this today, I wouldn't build the framework from scratch. But as an undergrad, building a neural network neuron by neuron and feeling mildly superhuman seeing it run on our supercomputer was the whole point :)
