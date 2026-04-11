@@ -131,3 +131,159 @@ html.scrolled #back-to-top {
 .accent-line.show {
   width: 40px;
 }
+
+/* ── Polaroid (homepage photo rotator) ─────────────────────────────────── */
+
+.polaroid-stage {
+  /* Center the polaroid and reserve enough room so the tilt + shadow don't
+     cause horizontal overflow. The min-height keeps the page from jumping
+     as the polaroid swaps photos of different aspect ratios. */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 1.5rem 0 2.5rem;
+  min-height: 380px;
+  perspective: 1200px;
+}
+
+.polaroid {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transform: rotate(var(--rot, -1.4deg));
+  transform-origin: 50% 60%;
+  transition:
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.4s ease,
+    opacity 0.5s ease;
+  will-change: transform, opacity;
+}
+
+.polaroid:hover {
+  transform: rotate(0deg) translateY(-3px);
+  filter: brightness(1.02);
+}
+
+.polaroid.swapping {
+  opacity: 0;
+}
+
+.polaroid-frame {
+  background: #f8f5ed;
+  padding: 12px 12px 6px 12px;
+  /* Layered shadow: tight contact + soft drop + faint warm glow */
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.06),
+    0 8px 18px rgba(20, 16, 12, 0.18),
+    0 28px 60px -20px rgba(20, 16, 12, 0.28);
+  border-radius: 1px;
+  /* Subtle paper texture via inner shadow */
+  position: relative;
+}
+
+.polaroid-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  opacity: 0.06;
+  mix-blend-mode: multiply;
+}
+
+.dark .polaroid-frame {
+  /* Aged-paper cream — like a polaroid that's been around. Less harsh
+     against the dark canvas than pure off-white, and reads as intentional. */
+  background: #d6ccba;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.55),
+    0 6px 14px rgba(0, 0, 0, 0.5),
+    0 24px 50px -18px rgba(0, 0, 0, 0.65),
+    /* Warm accent glow does the grounding work that drop shadows can't on a dark bg */
+    0 0 50px -10px rgba(196, 112, 63, 0.2);
+}
+
+.dark .polaroid-frame::before {
+  /* The noise texture is more visible on the darker cream — soften it. */
+  opacity: 0.08;
+}
+
+.dark .polaroid-caption {
+  color: #3d362c;
+}
+
+.dark .polaroid-caption-date {
+  color: #6e6557;
+}
+
+.dark .polaroid-photo-wrap {
+  background: #0a0908;
+}
+
+.polaroid-photo-wrap {
+  /* Fixed photo height — width grows with the photo's aspect ratio. */
+  height: 280px;
+  background: #1a1714;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.polaroid-photo {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: none;
+  transition: opacity 0.45s ease;
+}
+
+.polaroid-caption {
+  /* Slightly more bottom than top to keep the iconic polaroid look,
+     but tight enough that portrait photos don't get a giant white slab. */
+  padding: 10px 8px 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #4a4540;
+}
+
+.polaroid-caption-text {
+  font-family: "Cormorant", Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.polaroid-caption-text:empty {
+  display: none;
+}
+
+.polaroid-caption-date {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9c948c;
+}
+
+@media (max-width: 480px) {
+  .polaroid-photo-wrap {
+    height: 220px;
+  }
+  .polaroid-frame {
+    padding: 9px 9px 5px 9px;
+  }
+  .polaroid-caption {
+    padding: 8px 6px 11px;
+  }
+  .polaroid-stage {
+    min-height: 320px;
+    padding: 1rem 0 2rem;
+  }
+}

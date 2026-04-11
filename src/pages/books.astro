@@ -17,16 +17,16 @@ import { books } from "@lib/books";
         Books I recommend
       </div>
       <p class="animate text-sm text-content-secondary">
-        I tend to gravitate toward history, economics, and anything that changes how I think about systems. No particular order.
+        I’m usually drawn to history, economics, biographies, science, and anything that reshapes how I think about systems.
+      </p>
+      <p class="animate text-sm text-content-secondary">
+        In no particular order:
       </p>
       <ul class="animate grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2.5">
         {books.map(b => (
           <li class="text-sm"><span class="text-content-primary">{b.title}</span><span class="text-content-muted text-xs">, {b.author}</span></li>
         ))}
       </ul>
-      <p class="animate font-mono text-xs text-content-muted mt-4">
-        "It is what you read when you don't have to that determines who you will be when you can't help it." — Oscar Wilde
-      </p>
     </div>
   </Container>
 </PageLayout>

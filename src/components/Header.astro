@@ -8,16 +8,15 @@ const isHome = Astro.url.pathname === "/";
 <header>
   <Container>
     <div class="flex flex-wrap gap-y-2 justify-between items-baseline">
-      <a href="/" class:list={[
-        "font-display italic text-lg tracking-tight hover:text-accent transition-colors duration-300",
-        isHome ? "text-content-secondary" : "text-content-primary"
-      ]}>
-        {SITE.NAME}
+      <a href="/" class="font-mono text-sm tracking-tight text-content-secondary hover:text-accent transition-colors duration-300">
+        {isHome ? SITE.NAME : "Home"}
       </a>
       <nav class="flex items-center gap-1 font-mono text-sm tracking-tight">
         <a href="/blog" class="text-content-secondary hover:text-accent transition-colors duration-300">writing</a>
         <span class="text-accent/40 mx-1">/</span>
         <a href="/work" class="text-content-secondary hover:text-accent transition-colors duration-300">work</a>
+        <span class="text-accent/40 mx-1">/</span>
+        <a href="/photos" class="text-content-secondary hover:text-accent transition-colors duration-300">photos</a>
       </nav>
     </div>
   </Container>

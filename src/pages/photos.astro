@@ -1,0 +1,409 @@
+---
+import { Image, getImage } from "astro:assets";
+import PageLayout from "@layouts/PageLayout.astro";
+import Container from "@components/Container.astro";
+import { PHOTOS } from "@consts";
+import { photos as rawPhotos } from "@lib/photos";
+
+// Pre-generate a 1600px-wide optimized variant for the lightbox
+const photos = await Promise.all(
+  rawPhotos.map(async (p) => {
+    const lightbox = await getImage({
+      src: p.src,
+      width: Math.min(1600, p.src.width),
+      format: "webp",
+      quality: 82,
+    });
+    return { ...p, caption: p.caption ?? "", lightboxSrc: lightbox.src };
+  })
+);
+---
+
+<PageLayout title={PHOTOS.TITLE} description={PHOTOS.DESCRIPTION}>
+  <Container>
+    <div class="animate space-y-3">
+      <div class="font-display text-2xl text-content-primary">
+        Photos
+      </div>
+      <p class="text-sm text-content-secondary max-w-prose">
+        A loose collection of photos I have taken. Mostly with a Fujifilm X-T30 II, mostly while wandering. No theme, no chronology.
+      </p>
+    </div>
+  </Container>
+
+  <div class="mx-auto max-w-screen-xl px-5 mt-10">
+    <div class="animate photo-grid">
+        {photos.map((p) => (
+          <button
+            type="button"
+            class="photo-item group block w-full mb-6 text-left"
+            data-photo-src={p.lightboxSrc}
+            data-photo-caption={p.caption}
+            data-photo-location={p.location}
+            data-photo-date={p.date}
+            data-photo-camera={p.camera}
+            data-photo-lens={p.lens}
+            data-photo-focal={p.focalLength}
+            data-photo-aperture={p.aperture}
+            data-photo-shutter={p.shutter}
+            data-photo-iso={p.iso}
+            aria-label={p.caption ? `Open photo: ${p.caption}` : "Open photo"}
+          >
+            <div class="photo-frame overflow-hidden rounded-sm bg-[var(--bg-secondary)]">
+              <Image
+                src={p.src}
+                alt={p.caption || p.location || "Photograph"}
+                widths={[600, 900, 1200]}
+                sizes="(max-width: 768px) 100vw, 600px"
+                loading="lazy"
+                decoding="async"
+                quality={80}
+                format="webp"
+                class="w-full h-auto block transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+              />
+            </div>
+            <div class="mt-2 flex items-baseline justify-between gap-3">
+              {p.caption ? (
+                <span class="text-sm text-content-secondary truncate">{p.caption}</span>
+              ) : (
+                <span></span>
+              )}
+              <span class="font-mono text-xs text-content-muted shrink-0 truncate max-w-[60%]">
+                {p.location ? `${p.location} · ${p.date}` : p.date}
+              </span>
+            </div>
+          </button>
+        ))}
+      </div>
+  </div>
+
+  {/* Lightbox modal */}
+  <div id="lightbox" class="lightbox" aria-hidden="true" aria-modal="true" role="dialog" aria-label="Photo viewer">
+    <button id="lightbox-close" class="lightbox-close" aria-label="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-6 h-6">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <button id="lightbox-prev" class="lightbox-nav lightbox-prev" aria-label="Previous photo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-7 h-7">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+    <button id="lightbox-next" class="lightbox-nav lightbox-next" aria-label="Next photo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-7 h-7">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+    <figure class="lightbox-figure">
+      <img id="lightbox-img" alt="" />
+      <figcaption class="lightbox-caption">
+        <div id="lightbox-caption-main" class="lightbox-caption-main"></div>
+        <div id="lightbox-caption-meta" class="lightbox-caption-meta"></div>
+      </figcaption>
+    </figure>
+  </div>
+</PageLayout>
+
+<style>
+  /* Masonry via CSS columns */
+  .photo-grid {
+    column-count: 1;
+    column-gap: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .photo-grid {
+      column-count: 2;
+    }
+  }
+
+  .photo-item {
+    break-inside: avoid;
+    cursor: zoom-in;
+    padding: 0;
+    background: transparent;
+    border: none;
+  }
+
+  .photo-frame {
+    border: 1px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+
+  .photo-item:hover .photo-frame {
+    border-color: var(--bg-tertiary);
+  }
+
+  .photo-item:focus-visible {
+    outline: none;
+  }
+
+  .photo-item:focus-visible .photo-frame {
+    outline: 1px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 2rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .lightbox.open {
+    display: flex;
+    opacity: 1;
+  }
+
+  .lightbox-figure {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
+  }
+
+  #lightbox-img {
+    max-width: 100%;
+    max-height: calc(100vh - 8rem);
+    object-fit: contain;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: lightbox-fade 0.4s ease;
+  }
+
+  .lightbox-caption {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-width: min(720px, 90vw);
+  }
+
+  .lightbox-caption-main {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.92);
+    letter-spacing: 0.01em;
+  }
+
+  .lightbox-caption-meta {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.03em;
+  }
+
+  .lightbox-caption-main:empty,
+  .lightbox-caption-meta:empty {
+    display: none;
+  }
+
+  @keyframes lightbox-fade {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .lightbox-close,
+  .lightbox-nav {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 9999px;
+    padding: 0.65rem;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lightbox-close {
+    top: 1.5rem;
+    right: 1.5rem;
+  }
+
+  .lightbox-prev {
+    left: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lightbox-next {
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .lightbox-close:hover,
+  .lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .lightbox-prev:hover,
+  .lightbox-next:hover {
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  @media (max-width: 640px) {
+    .lightbox {
+      padding: 1rem;
+    }
+    .lightbox-close,
+    .lightbox-nav {
+      padding: 0.5rem;
+    }
+    .lightbox-prev { left: 0.5rem; }
+    .lightbox-next { right: 0.5rem; }
+    .lightbox-close { top: 0.75rem; right: 0.75rem; }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var keyHandler = null;
+
+    function shufflePhotos() {
+      var grid = document.querySelector(".photo-grid");
+      if (!grid) return;
+      var children = Array.prototype.slice.call(grid.children);
+      for (var i = children.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = children[i];
+        children[i] = children[j];
+        children[j] = tmp;
+      }
+      var frag = document.createDocumentFragment();
+      children.forEach(function (el) { frag.appendChild(el); });
+      grid.appendChild(frag);
+    }
+
+    function initPhotos() {
+      shufflePhotos();
+
+      var lightbox = document.getElementById("lightbox");
+      var lightboxImg = document.getElementById("lightbox-img");
+      var captionMain = document.getElementById("lightbox-caption-main");
+      var captionMeta = document.getElementById("lightbox-caption-meta");
+      var closeBtn = document.getElementById("lightbox-close");
+      var prevBtn = document.getElementById("lightbox-prev");
+      var nextBtn = document.getElementById("lightbox-next");
+      if (!lightbox || !lightboxImg) return;
+
+      var items = Array.prototype.slice.call(document.querySelectorAll(".photo-item"));
+      if (!items.length) return;
+
+      var current = 0;
+      var lastFocused = null;
+
+      function joinDot(parts) {
+        return parts.filter(function (s) { return !!s; }).join(" · ");
+      }
+
+      function show(i) {
+        if (i < 0) i = items.length - 1;
+        if (i >= items.length) i = 0;
+        current = i;
+        var d = items[i].dataset;
+        lightboxImg.src = d.photoSrc || "";
+        lightboxImg.alt = d.photoCaption || d.photoLocation || "Photograph";
+
+        // Top line: the "what" — caption, location, date
+        if (captionMain) {
+          captionMain.textContent = joinDot([
+            d.photoCaption,
+            d.photoLocation,
+            d.photoDate,
+          ]);
+        }
+
+        // Bottom line: the "how" — camera, lens, exposure
+        if (captionMeta) {
+          captionMeta.textContent = joinDot([
+            d.photoCamera,
+            d.photoLens,
+            d.photoFocal,
+            d.photoAperture,
+            d.photoShutter,
+            d.photoIso,
+          ]);
+        }
+      }
+
+      function open(i) {
+        lastFocused = document.activeElement;
+        show(i);
+        lightbox.classList.add("open");
+        lightbox.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        // Defer focus until the dialog is actually rendered
+        requestAnimationFrame(function () { closeBtn && closeBtn.focus(); });
+      }
+
+      function close() {
+        lightbox.classList.remove("open");
+        lightbox.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        if (lastFocused && typeof lastFocused.focus === "function") {
+          lastFocused.focus();
+        }
+      }
+
+      // Direct property assignment is idempotent — re-running initPhotos
+      // (e.g. on astro:after-swap) replaces handlers instead of stacking them.
+      items.forEach(function (item, i) {
+        item.onclick = function () { open(i); };
+      });
+
+      if (closeBtn) closeBtn.onclick = close;
+      if (prevBtn) prevBtn.onclick = function (e) { e.stopPropagation(); show(current - 1); };
+      if (nextBtn) nextBtn.onclick = function (e) { e.stopPropagation(); show(current + 1); };
+
+      lightbox.onclick = function (e) {
+        if (e.target === lightbox || e.target === lightboxImg) close();
+      };
+
+      // Replace prior document keydown handler so it doesn't stack
+      if (keyHandler) document.removeEventListener("keydown", keyHandler);
+      keyHandler = function (e) {
+        if (!lightbox.classList.contains("open")) return;
+        if (e.key === "Escape") { e.preventDefault(); close(); return; }
+        if (e.key === "ArrowLeft") { e.preventDefault(); show(current - 1); return; }
+        if (e.key === "ArrowRight") { e.preventDefault(); show(current + 1); return; }
+        if (e.key === "Tab") {
+          // Focus trap across the lightbox's focusable controls
+          var focusables = [closeBtn, prevBtn, nextBtn].filter(Boolean);
+          if (!focusables.length) return;
+          var idx = focusables.indexOf(document.activeElement);
+          if (e.shiftKey) {
+            if (idx <= 0) {
+              e.preventDefault();
+              focusables[focusables.length - 1].focus();
+            }
+          } else {
+            if (idx === -1 || idx === focusables.length - 1) {
+              e.preventDefault();
+              focusables[0].focus();
+            }
+          }
+        }
+      };
+      document.addEventListener("keydown", keyHandler);
+    }
+
+    initPhotos();
+    document.addEventListener("astro:after-swap", initPhotos);
+  })();
+</script>

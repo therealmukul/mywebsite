@@ -20,7 +20,6 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
   homepageCompanies.includes(entry.data.company) &&
   arr.findIndex(e => e.data.company === entry.data.company) === i
 );
-
 ---
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
@@ -40,10 +39,10 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
           </p>
           <article>
             <p class="animate text-base leading-relaxed">
-              I like finding and solving meaningful non-trivial problems at the intersection of research and application. I love building things from zero to one and prefer working with like-minded mission-driven people who care deeply about the societal impact of their work.
+              I like finding and solving meaningful non-trivial problems at the intersection of research and application. I love building things from zero to one and care deeply about the societal impact of my work.
             </p>
             <p class="animate text-base leading-relaxed">
-              Outside of work, I read and write quite a bit, dabble in photography, and have a weakness for anything with an engine. I am slowly — very slowly — working towards my pilot's licence.
+              Outside of work, I read quite a bit, write when the mood strikes, and have a weakness for anything with an engine. I am slowly — very slowly — working towards my pilot's licence.
             </p>
           </article>
         </div>
@@ -59,19 +58,24 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
             See details
           </Link>
         </div>
-        <ul class="flex flex-wrap gap-6">
+        <ul class="grid grid-cols-5 gap-4 sm:flex sm:flex-wrap sm:gap-6">
           {uniqueWork.map(entry => (
             entry.data.icon && (
               <li>
                 <a href={entry.data.url || "/work"} target={entry.data.url ? "_blank" : "_self"} class="flex flex-col items-center gap-2 group">
-                  <div class="w-12 h-12 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center group-hover:bg-[var(--bg-tertiary)] transition-colors duration-300">
+                  <div class="w-14 h-14 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center group-hover:bg-[var(--bg-tertiary)] transition-colors duration-300">
                     <img
                       src={entry.data.icon}
                       alt={entry.data.company}
-                      class="w-7 h-7 object-contain transition-all duration-300"
+                      class="w-8 h-8 object-contain transition-all duration-300"
                     />
                   </div>
-                  <span class="font-mono text-xs text-content-muted group-hover:text-content-secondary transition-colors text-center leading-tight">
+                  <span class:list={[
+                    "font-mono text-xs group-hover:text-content-secondary transition-colors text-center leading-tight",
+                    typeof entry.data.dateEnd === "string" && entry.data.dateEnd.toLowerCase() === "current"
+                      ? "text-content-primary"
+                      : "text-content-muted"
+                  ]}>
                     {entry.data.company}
                   </span>
                   {typeof entry.data.dateEnd === "string" && entry.data.dateEnd.toLowerCase() === "current" && (
@@ -83,7 +87,7 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
           ))}
           <li>
             <a href="/work" class="flex flex-col items-center gap-2 group">
-              <div class="w-12 h-12 rounded-xl bg-[var(--bg-secondary)] group-hover:bg-[var(--bg-tertiary)] transition-colors duration-300 flex items-center justify-center">
+              <div class="w-14 h-14 rounded-xl bg-[var(--bg-secondary)] group-hover:bg-[var(--bg-tertiary)] transition-colors duration-300 flex items-center justify-center">
                 <span class="text-content-muted text-lg tracking-widest">...</span>
               </div>
               <span class="font-mono text-xs text-content-muted group-hover:text-content-secondary transition-colors text-center leading-tight">
