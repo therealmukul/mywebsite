@@ -9,6 +9,8 @@
     "preview": "astro preview",
     "preview:network": "astro preview --host",
     "astro": "astro",
+    "deploy": "bash scripts/deploy.sh",
+    "deploy:nobuild": "bash scripts/deploy.sh --no-build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
