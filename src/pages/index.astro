@@ -65,7 +65,11 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
             entry.data.icon && (
               <li>
                 <a href={entry.data.url || "/work"} target={entry.data.url ? "_blank" : "_self"} class="flex flex-col items-center gap-2 group">
-                  <div class="w-14 h-14 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center group-hover:bg-[var(--bg-tertiary)] transition-colors duration-300">
+                  <div class:list={[
+                    "w-14 h-14 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center group-hover:bg-[var(--bg-tertiary)] transition-colors duration-300",
+                    typeof entry.data.dateEnd === "string" && entry.data.dateEnd.toLowerCase() === "current" &&
+                      "ring-1 ring-accent ring-offset-2 ring-offset-[var(--bg-primary)]"
+                  ]}>
                     <img
                       src={entry.data.icon}
                       alt={entry.data.company}
