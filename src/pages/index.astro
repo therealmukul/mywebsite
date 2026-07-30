@@ -3,9 +3,11 @@ import { getCollection } from "astro:content";
 import Container from "@components/Container.astro";
 import PageLayout from "@layouts/PageLayout.astro";
 import ArrowCard from "@components/ArrowCard.astro";
+import PressCard from "@components/PressCard.astro";
 import Link from "@components/Link.astro";
 import { SITE, HOME, SOCIALS } from "@consts";
 import { books as allBooks } from "@lib/books";
+import { press } from "@lib/press";
 
 const blog = (await getCollection("blog"))
   .filter(post => !post.data.draft)
@@ -116,6 +118,19 @@ const uniqueWork = allwork.filter((entry, i, arr) =>
           {blog.map(post => (
             <li>
               <ArrowCard entry={post} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="animate space-y-6">
+        <h2 class="font-display text-xl text-content-primary">
+          Featured in
+        </h2>
+        <ul class="flex flex-col gap-4">
+          {press.map(item => (
+            <li>
+              <PressCard item={item} />
             </li>
           ))}
         </ul>
