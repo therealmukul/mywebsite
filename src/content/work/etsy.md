@@ -1,6 +1,6 @@
 ---
 company: "Etsy"
-role: "Staff Machine Learning Scientist, Ads Ranking & Relevance"
+role: "Staff ML Scientist, Ads Ranking & Relevance"
 dateStart: "09/01/2025"
 dateEnd: "Current"
 icon: "/work/etsy.png"

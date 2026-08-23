@@ -1,6 +1,6 @@
 ---
 company: "HubSpot"
-role: "Senior Machine Learning Engineer II"
+role: "Senior ML Engineer II"
 dateStart: "01/01/2021"
 dateEnd: "12/31/2023"
 icon: "/work/hubspot.png"

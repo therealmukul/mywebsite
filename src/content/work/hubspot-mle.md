@@ -1,6 +1,6 @@
 ---
 company: "HubSpot"
-role: "Machine Learning Engineer"
+role: "ML Engineer"
 dateStart: "01/01/2017"
 dateEnd: "12/31/2017"
 icon: "/work/hubspot.png"

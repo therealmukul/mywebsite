@@ -1,6 +1,6 @@
 ---
 company: "Writer"
-role: "Staff Machine Learning Engineer - Multimodality"
+role: "Staff ML Engineer - Multimodality"
 dateStart: "01/01/2025"
 dateEnd: "09/01/2025"
 icon: "/work/writer.png"
